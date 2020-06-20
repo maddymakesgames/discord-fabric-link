@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.maddymakesgames.discordlink.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+	"DedicatedMinecraftServerMixin",
+	"DiscordMemberMixin",
+	"DiscordUserMixin",
+	"MinecraftServerMixin",
+	"PlayerManagerMixin",
+	"ServerCommandSourceMixin",
+	"ServerPlayerEntityMixin"
+  ],
+  "client": [],
+  "injectors": {
+	"defaultRequire": 1
+  }
+}
