@@ -1,7 +1,9 @@
+import net.fabricmc.loom.task.RemapJarTask
+
 plugins {
 	id 'fabric-loom' version '0.4-SNAPSHOT'
 	id 'maven-publish'
-	id "com.github.johnrengelman.shadow" version "5.2.0"
+	id "com.github.johnrengelman.shadow" version "6.0.0"
 }
 
 repositories {
@@ -27,8 +29,14 @@ dependencies {
 	modApi "me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig}"
 	include "me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig}"
 
-	modApi "com.discord4j:discord4j-core:${project.discord4j}"
-	include "com.discord4j:discord4j-core:${project.discord4j}"
+	/*
+	 Weird stuff with this
+	 For the user mixin to apply this has to not be a mod implementation / api (and possibly for production to work)
+	 but if its not mod then in a dev environment the netty relocate won't do anything
+	 so basically dev environment doesn't work
+	*/
+	implementation "com.discord4j:discord4j-core:${project.discord4j}"
+	shadow "com.discord4j:discord4j-core:${project.discord4j}"
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
@@ -62,9 +70,34 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 	from sourceSets.main.allSource
 }
 
-jar {
-	from "LICENSE"
+tasks.jar.enabled = false
+tasks.remapJar.enabled = false
+
+shadowJar {
+	destinationDirectory = file("${buildDir}/tmp/allJar")
+	configurations = [project.configurations.shadow]
+	relocate 'io.netty', 'shaded.io.netty'
+
+	//Exclude META-INF entries of shaded deps
+	exclude 'META-INF/**'
+	from('.') {
+		include 'LICENSE.md'
+		include 'NOTICE.txt'
+		include 'licenses/**'
+	}
+	minimize()
 }
+
+task remapShadowJar(type: RemapJarTask) {
+	dependsOn shadowJar
+	input = shadowJar.archiveFile
+	addNestedDependencies.set(true)
+}
+
+build {
+	dependsOn remapShadowJar
+}
+
 
 // configure the maven publication
 publishing {
@@ -86,10 +119,3 @@ publishing {
 		// mavenLocal()
 	}
 }
-
-// Relocating a Package
-shadowJar {
-	relocate 'io.netty', 'shaded.io.netty'
-}
-
-//build.dependsOn shadowJar
