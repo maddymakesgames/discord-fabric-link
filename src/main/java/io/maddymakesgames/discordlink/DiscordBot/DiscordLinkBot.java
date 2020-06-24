@@ -1,19 +1,19 @@
 package io.maddymakesgames.discordlink.DiscordBot;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
-import io.maddymakesgames.discordlink.DiscordBot.Commands.CommandHelper;
-import io.maddymakesgames.discordlink.DiscordBot.Commands.DiscordCommand;
+import io.maddymakesgames.discordlink.BrigadierUtils.DiscordCommandDispatcher;
+import io.maddymakesgames.discordlink.DiscordBot.Util.DiscordCommand;
 import io.maddymakesgames.discordlink.DiscordLink;
 import io.maddymakesgames.discordlink.Util.LinkablePlayer;
-import io.maddymakesgames.discordlink.Util.LinkableUser;
+import net.minecraft.network.MessageType;
+import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import org.apache.logging.log4j.Level;
@@ -23,12 +23,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class DiscordLinkBot {
 	private final DiscordClient client;
 	private final List<TextChannel> activeChannels = new ArrayList<>();
 	private final HashMap<String, DiscordCommand> commands = new HashMap<>();
+	private final DiscordCommandDispatcher dispatcher;
+
 	public final HashMap<String, ServerPlayerEntity> registeringPlayersCache = new HashMap<>();
+	public final HashMap<Snowflake, ServerPlayerEntity> registeredPlayers = new HashMap<>();
 	public final String prefix;
 
 	public static boolean initialized = false;
@@ -37,6 +41,8 @@ public class DiscordLinkBot {
 	public DiscordLinkBot(String token, String[] channels, String prefix) {
 		client = DiscordClient.create(token);
 		this.prefix = prefix;
+
+		dispatcher = new DiscordCommandDispatcher(prefix);
 
 		client.getEventDispatcher().on(ReadyEvent.class).subscribe(readyEvent -> {
 			LogManager.getLogger("discord-link").log(Level.INFO,  String.format("Logged in as %s#%s", readyEvent.getSelf().getUsername(), readyEvent.getSelf().getDiscriminator()));
@@ -56,7 +62,7 @@ public class DiscordLinkBot {
 	}
 
 	public void register(DiscordCommand cmd) {
-		commands.put(cmd.getName(), cmd);
+		cmd.register(dispatcher);
 	}
 
 	public DiscordCommand getCommand(String str) {
@@ -79,8 +85,15 @@ public class DiscordLinkBot {
 
 	public void linkAccount(ServerPlayerEntity player) {
 		if(!((LinkablePlayer)player).isLinked()) return;
-		LinkableUser user = (LinkableUser) client.getUserById(((LinkablePlayer)player).getLink());
-		user.link(player.getUuid());
+		registeredPlayers.put(((LinkablePlayer) player).getLink(), player);
+	}
+
+	public User getUser(String username) {
+		List<User> users = this.client.getUsers().collectList().block();
+		users = users.stream().filter(u -> u.getUsername().equals(username) || (u.getUsername() + "#" + u.getDiscriminator()).equals(username)  || String.format("<@%s>", u.getId()).equals(username)).collect(Collectors.toList());
+		if(users.size() > 0)
+			return users.get(0);
+		return null;
 	}
 
 	private boolean isListening(Snowflake channelID) {
@@ -92,28 +105,16 @@ public class DiscordLinkBot {
 
 	private void onMessage(MessageCreateEvent event) {
 		Message msg = event.getMessage();
-		DiscordCommand cmd = getCommand(msg.getContent().orElse(""));
+		if (!event.getMember().isPresent() || event.getMember().get().isBot() || !isListening(msg.getChannelId())) return;
+		System.out.println("TEST");
+		int executeReturn = dispatcher.execute(msg.getContent().get(), msg);
+		System.out.println(String.format("%s %s", executeReturn, msg.getContent().get()));
 
-		if (!event.getMember().isPresent() && event.getMember().get().isBot()) return;
-		if (cmd != null	) {
+		if(executeReturn == -2) {
+			DiscordLink.instance.server.getPlayerManager().sendToAll(new GameMessageS2CPacket(new LiteralText(msg.getContent().orElse("§oEmpty Message")),
+					MessageType.CHAT,
+					registeredPlayers.get(msg.getAuthor().get().getId()) == null ? UUID.randomUUID() : registeredPlayers.get(msg.getAuthor().get().getId()).getUuid()));
+		}
 
-			Member member = event.getMember().get();
-			UUID playerID = ((LinkableUser)msg.getAuthor().get()).getLink();
-
-			if (playerID == null && cmd.requireLink()) {
-				event.getMessage().getChannel().subscribe(channel -> channel.createMessage(String.format("%s you need to have your minecraft player registered to use that command", member.getDisplayName())));
-			}
-
-			try {
-				CommandHelper.handleResponse(cmd.execute(CommandHelper.createContext(playerID, msg.getAuthor().get(), msg.getContent().get(), cmd.getNode())), msg);
-			} catch (CommandSyntaxException e) {
-				LogManager.getLogger("discord-link").error(String.format("Error executing command %s, %s", cmd.getName(), e));
-			}
-
-		} else if (cmd != null)
-			msg.getChannel().subscribe(channel -> channel.createMessage("You do not have permission to use that command").subscribe().dispose());
-
-		else if(isListening(msg.getChannelId()))
-			DiscordLink.instance.server.getPlayerManager().sendToAll(new LiteralText(msg.getContent().orElse("§oEmpty Message")));
 	}
 }

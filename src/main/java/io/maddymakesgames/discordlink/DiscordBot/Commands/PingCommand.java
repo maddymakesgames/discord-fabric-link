@@ -4,14 +4,15 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.tree.CommandNode;
 import io.maddymakesgames.discordlink.DiscordBot.DiscordLinkBot;
 import io.maddymakesgames.discordlink.DiscordBot.Permission;
+import io.maddymakesgames.discordlink.DiscordBot.Util.CommandHelper;
+import io.maddymakesgames.discordlink.DiscordBot.Util.CommandReturn;
+import io.maddymakesgames.discordlink.DiscordBot.Util.DiscordCommand;
 import io.maddymakesgames.discordlink.DiscordLink;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import org.apache.logging.log4j.LogManager;
 
 public class PingCommand implements DiscordCommand {
 	LiteralArgumentBuilder<ServerCommandSource> cmd = CommandManager.literal("ping").requires((source) -> {
@@ -23,7 +24,7 @@ public class PingCommand implements DiscordCommand {
 			hasPlayer = false;
 		}
 		return DiscordLinkBot.initialized && hasPlayer;
-	}).executes(ctx -> CommandHelper.handleResponse(execute(ctx), ctx.getSource().getPlayer()));;
+	}).executes(ctx -> CommandHelper.handleResponse(execute(ctx), ctx.getSource()));;
 
 	public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
 		dispatcher.register(cmd);
@@ -39,11 +40,6 @@ public class PingCommand implements DiscordCommand {
 		return Permission.Everyone;
 	}
 
-	@Override
-	public boolean requireLink() {
-		return false;
-	}
-
 	public CommandReturn execute(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
 		ServerPlayerEntity player = ctx.getSource().getPlayer();
 		long discordPing = DiscordLink.instance.bot.ping();
@@ -54,8 +50,7 @@ public class PingCommand implements DiscordCommand {
 		return new CommandReturn(output, 1, false);
 	}
 
-	@Override
-	public CommandNode<ServerCommandSource> getNode() {
-		return cmd.build();
+	public LiteralArgumentBuilder<ServerCommandSource> getNode() {
+		return cmd;
 	}
 }

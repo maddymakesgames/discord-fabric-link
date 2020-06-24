@@ -1,3 +1,7 @@
+// Currently this mixin just doesn't apply and I don't know why
+// Going to make this work after 1.16 is out
+// Guessing this has to do with me mixing into a non-minecraft/fabric class
+
 package io.maddymakesgames.discordlink.mixin;
 
 import discord4j.core.object.entity.User;

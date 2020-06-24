@@ -1,7 +1,5 @@
 package io.maddymakesgames.discordlink.mixin;
 
-import discord4j.core.object.util.Snowflake;
-import io.maddymakesgames.discordlink.Util.Linkable;
 import io.maddymakesgames.discordlink.DiscordLink;
 import io.maddymakesgames.discordlink.Util.LinkablePlayer;
 import net.minecraft.network.ClientConnection;
@@ -20,6 +18,7 @@ public class PlayerManagerMixin {
 	@Inject(method = "onPlayerConnect", at = @At("TAIL"))
 	public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo cbi) {
 		if(((LinkablePlayer) player).isLinked()) DiscordLink.instance.bot.linkAccount(player);
-		else player.sendMessage(new LiteralText("Please link your discord account via /link").formatted(Formatting.DARK_PURPLE)/*, false*/);
+		else player.sendMessage(new LiteralText("Please link your discord account via /link").formatted(Formatting.DARK_PURPLE), true );
+
 	}
 }

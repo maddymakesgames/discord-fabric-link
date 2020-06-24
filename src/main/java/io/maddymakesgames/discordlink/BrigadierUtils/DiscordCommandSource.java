@@ -1,5 +1,6 @@
-package io.maddymakesgames.discordlink.Util;
+package io.maddymakesgames.discordlink.BrigadierUtils;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 
 public interface DiscordCommandSource {
@@ -7,4 +8,6 @@ public interface DiscordCommandSource {
 	void setDiscord(boolean isDiscord);
 	User getUser();
 	void setUser(User user);
+	Message getMessage();
+	void setMessage(Message msg);
 }

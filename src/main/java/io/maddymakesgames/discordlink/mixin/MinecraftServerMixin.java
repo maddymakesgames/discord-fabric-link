@@ -10,11 +10,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.UUID;
+
 @Mixin(MinecraftServer.class)
 public class MinecraftServerMixin {
 
-	@Inject(method = "sendMessage", at = @At("RETURN"))
-	public void sendMessage(Text message, CallbackInfo cbi) {
+	@Inject(method = "sendSystemMessage", at = @At("RETURN"))
+	public void sendMessage(Text message, UUID senderUuid, CallbackInfo ci) {
 		if(DiscordLinkBot.initialized && !message.getString().equalsIgnoreCase("") && message instanceof TranslatableText) DiscordLink.instance.bot.sendMessage(message.getString());
 	}
 }

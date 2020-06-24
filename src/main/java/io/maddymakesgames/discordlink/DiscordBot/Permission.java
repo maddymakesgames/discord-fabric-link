@@ -13,6 +13,7 @@ import java.util.UUID;
 public enum Permission {
 	Everyone,
 	Unregistered,
+	Registered,
 	Owner;
 
 	public boolean isAllowed(User user) {
@@ -22,7 +23,9 @@ public enum Permission {
 			case Owner:
 				return user.getId().equals(Snowflake.of("206102420177027072"));
 			case Unregistered:
-				return ((LinkableUser) user).isLinked();
+				return DiscordLink.instance.bot.registeredPlayers.get(user.getId()) == null;
+			case Registered:
+				return DiscordLink.instance.bot.registeredPlayers.get(user.getId()) != null;
 			default:
 				return false;
 		}
@@ -33,8 +36,9 @@ public enum Permission {
 			case Everyone:
 				return true;
 			case Owner:
-				return ((LinkablePlayer)player).isLinked() && ((LinkablePlayer)player).getLink().equals(DiscordLink.instance.config.ownerID);
+				return ((LinkablePlayer)player).isLinked() && ((LinkablePlayer)player).getLink().asString().equals(DiscordLink.instance.config.ownerID);
 			case Unregistered:
+			case Registered:
 				return ((LinkablePlayer) player).isLinked();
 			default:
 				return false;
