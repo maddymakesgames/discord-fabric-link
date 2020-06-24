@@ -35,7 +35,6 @@ public class ServerPlayerEntityMixin implements LinkablePlayer {
 
 	@Inject(method = "writeCustomDataToTag", at = @At("RETURN"))
 	public void writeCustomDataToTag(CompoundTag tag, CallbackInfo ci) {
-		System.out.println("Saving player data");
 		if(linkedAccount != null) tag.putString("dl-snow", linkedAccount.asString());
 	}
 

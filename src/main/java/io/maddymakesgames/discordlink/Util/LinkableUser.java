@@ -1,6 +1,6 @@
 package io.maddymakesgames.discordlink.Util;
 
-import java.util.UUID;
+import net.minecraft.server.network.ServerPlayerEntity;
 
-public interface LinkableUser extends Linkable<UUID> {
+public interface LinkableUser extends Linkable<ServerPlayerEntity> {
 }

@@ -46,7 +46,6 @@ public class AnnounceCommand implements DiscordCommand {
 	@Override
 	public CommandReturn execute(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
 		ServerCommandSource source = ctx.getSource();
-		System.out.println(((LinkablePlayer)source.getPlayer()).getLink().asString().equals(DiscordLink.instance.config.ownerID));
 		if(!(((DiscordCommandSource)source).isDiscord() ? Permission.Owner.isAllowed(((DiscordCommandSource)source).getUser()) : Permission.Owner.isAllowed(source.getPlayer())))
 			return failure("");
 

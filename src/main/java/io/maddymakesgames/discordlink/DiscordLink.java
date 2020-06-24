@@ -10,6 +10,7 @@ import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.MinecraftServer;
+import org.apache.logging.log4j.LogManager;
 
 public class DiscordLink implements ModInitializer {
 
@@ -22,7 +23,7 @@ public class DiscordLink implements ModInitializer {
 	public void onInitialize() {
 		instance = this;
 
-		System.out.println("Loading Discord-Link");
+		LogManager.getLogger("discord-link").info("Loading discord-link...");
 		AutoConfig.register(DiscordLinkConfig.class, JanksonConfigSerializer::new);
 
 		config = AutoConfig.getConfigHolder(DiscordLinkConfig.class).getConfig();

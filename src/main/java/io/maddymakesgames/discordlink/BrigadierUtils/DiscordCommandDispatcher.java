@@ -6,6 +6,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import io.maddymakesgames.discordlink.DiscordBot.Util.CommandHelper;
 import io.maddymakesgames.discordlink.DiscordLink;
+import io.maddymakesgames.discordlink.Util.LinkableUser;
 import net.minecraft.server.command.ServerCommandSource;
 
 public class DiscordCommandDispatcher extends CommandDispatcher<ServerCommandSource> {
@@ -17,7 +18,7 @@ public class DiscordCommandDispatcher extends CommandDispatcher<ServerCommandSou
 
 	public int execute(String input, Message msg) {
 		User user = msg.getAuthor().get();
-		ServerCommandSource source = CommandHelper.createSource(DiscordLink.instance.bot.registeredPlayers.get(user.getId()));
+		ServerCommandSource source = CommandHelper.createSource(((LinkableUser)user).getLink());
 
 		((DiscordCommandSource) source).setDiscord(true);
 		((DiscordCommandSource) source).setMessage(msg);
@@ -37,7 +38,6 @@ public class DiscordCommandDispatcher extends CommandDispatcher<ServerCommandSou
 			}
 		}
 
-		System.out.println(reader1.getRemaining());
 
 		try {
 			return super.execute(reader, source);

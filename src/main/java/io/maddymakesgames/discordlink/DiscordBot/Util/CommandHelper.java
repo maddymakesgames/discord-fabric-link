@@ -25,11 +25,10 @@ public class CommandHelper {
 			return cmdReturn.returnVal;
 
 		DiscordCommandSource dSource = (DiscordCommandSource) source;
-
 		if(dSource.isDiscord()) {
 			Message msg = dSource.getMessage();
-			if(cmdReturn.dm && msg.getAuthor().isPresent()) msg.getAuthor().get().getPrivateChannel().subscribe(channel -> channel.createMessage(cmdReturn.message).subscribe().dispose()).dispose();
-			else msg.getChannel().subscribe(channel -> channel.createMessage(cmdReturn.message).subscribe().dispose()).dispose();
+			if(cmdReturn.dm && msg.getAuthor().isPresent()) DiscordLink.instance.bot.sendMessage(cmdReturn.message, msg.getAuthor().get().getPrivateChannel().block().getId());
+			else DiscordLink.instance.bot.sendMessage(cmdReturn.message, msg.getChannelId());
 		}
 		else {
 			ServerPlayerEntity player = source.getPlayer();
@@ -45,9 +44,5 @@ public class CommandHelper {
 			player = server.getPlayerManager().createPlayer(new GameProfile(UUID.randomUUID(), nullname));
 
 		return new ServerCommandSource(null, Vec3d.ZERO, Vec2f.ZERO, server.getWorlds().iterator().next(), 1, "stuff", new LiteralText(""), server, player);
-	}
-
-	public static ServerPlayerEntity getLink(User user) {
-		return DiscordLink.instance.bot.registeredPlayers.get(user.getId());
 	}
 }

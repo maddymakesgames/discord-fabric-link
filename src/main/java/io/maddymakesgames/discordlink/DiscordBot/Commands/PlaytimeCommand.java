@@ -12,11 +12,11 @@ import io.maddymakesgames.discordlink.DiscordBot.Permission;
 import io.maddymakesgames.discordlink.DiscordBot.Util.CommandReturn;
 import io.maddymakesgames.discordlink.DiscordBot.Util.DiscordCommand;
 import io.maddymakesgames.discordlink.DiscordLink;
+import io.maddymakesgames.discordlink.Util.LinkableUser;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.Stats;
 
-import static io.maddymakesgames.discordlink.DiscordBot.Util.CommandHelper.getLink;
 import static io.maddymakesgames.discordlink.DiscordBot.Util.CommandHelper.handleResponse;
 import static io.maddymakesgames.discordlink.DiscordBot.Util.CommandReturn.failure;
 import static io.maddymakesgames.discordlink.DiscordBot.Util.CommandReturn.success;
@@ -45,7 +45,7 @@ public class PlaytimeCommand implements DiscordCommand {
 
 	@Override
 	public CommandReturn execute(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-		ServerPlayerEntity player = ((DiscordCommandSource)ctx.getSource()).isDiscord() ? getLink(((DiscordCommandSource)ctx.getSource()).getUser()) : ctx.getSource().getPlayer();
+		ServerPlayerEntity player = ((DiscordCommandSource)ctx.getSource()).isDiscord() ? ((LinkableUser)((DiscordCommandSource)ctx.getSource()).getUser()).getLink() : ctx.getSource().getPlayer();
 
 		if(player == null)
 			return failure("You must be linked to a minecraft account to use this command");
@@ -59,7 +59,7 @@ public class PlaytimeCommand implements DiscordCommand {
 
 		ServerPlayerEntity player = DiscordLink.instance.server.getPlayerManager().getPlayer(playerName);
 		if(player == null)
-			player = instance.bot.registeredPlayers.get(instance.bot.getUser(playerName).getId());
+			player = ((LinkableUser)instance.bot.getUser(playerName)).getLink();
 		if(player == null)
 			return failure(String.format("No player with the name %s was found", playerName));
 		return success(String.format("%s has played for %s", player.getDisplayName().asString(), formatTime(player.getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_ONE_MINUTE)))));

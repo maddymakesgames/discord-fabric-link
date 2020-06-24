@@ -23,9 +23,9 @@ public enum Permission {
 			case Owner:
 				return user.getId().equals(Snowflake.of("206102420177027072"));
 			case Unregistered:
-				return DiscordLink.instance.bot.registeredPlayers.get(user.getId()) == null;
+				return !((LinkableUser)user).isLinked();
 			case Registered:
-				return DiscordLink.instance.bot.registeredPlayers.get(user.getId()) != null;
+				return ((LinkableUser)user).isLinked();
 			default:
 				return false;
 		}
@@ -38,6 +38,7 @@ public enum Permission {
 			case Owner:
 				return ((LinkablePlayer)player).isLinked() && ((LinkablePlayer)player).getLink().asString().equals(DiscordLink.instance.config.ownerID);
 			case Unregistered:
+				return !((LinkablePlayer) player).isLinked();
 			case Registered:
 				return ((LinkablePlayer) player).isLinked();
 			default:

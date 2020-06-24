@@ -17,7 +17,7 @@ public class PlayerManagerMixin {
 
 	@Inject(method = "onPlayerConnect", at = @At("TAIL"))
 	public void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo cbi) {
-		if(((LinkablePlayer) player).isLinked()) DiscordLink.instance.bot.linkAccount(player);
+		if(((LinkablePlayer) player).isLinked()) DiscordLink.instance.bot.getUser(((LinkablePlayer)player).getLink());
 		else player.sendMessage(new LiteralText("Please link your discord account via /link").formatted(Formatting.DARK_PURPLE), true );
 
 	}

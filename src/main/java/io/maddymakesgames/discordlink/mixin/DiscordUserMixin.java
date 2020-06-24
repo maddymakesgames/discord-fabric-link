@@ -6,6 +6,7 @@ package io.maddymakesgames.discordlink.mixin;
 
 import discord4j.core.object.entity.User;
 import io.maddymakesgames.discordlink.Util.LinkableUser;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,31 +17,25 @@ import java.util.UUID;
 
 @Mixin(value = User.class, remap = false)
 public class DiscordUserMixin implements LinkableUser {
-
-	@Inject(method = "getUsername", at = @At("RETURN"), cancellable = true)
-	private void getUsername(CallbackInfoReturnable<String> cir) {
-		System.out.println("User Mixin Works");
-		cir.setReturnValue("Test Mixin");
-	}
 	
 	@Unique
-	private UUID linkedID;
+	private ServerPlayerEntity linkedPlayer;
 
 	@Unique
 	@Override
 	public boolean isLinked() {
-		return linkedID != null;
+		return linkedPlayer != null;
 	}
 
 	@Unique
 	@Override
-	public void link(UUID linkedID) {
-		this.linkedID = linkedID;
+	public void link(ServerPlayerEntity linkedID) {
+		this.linkedPlayer = linkedID;
 	}
 
 	@Unique
 	@Override
-	public UUID getLink() {
-		return linkedID;
+	public ServerPlayerEntity getLink() {
+		return linkedPlayer;
 	}
 }
