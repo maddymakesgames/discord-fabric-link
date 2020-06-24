@@ -33,6 +33,7 @@ public class DiscordLinkBot {
 	public final String prefix;
 
 	public static boolean initialized = false;
+	public static boolean listening = false;
 	public static String name;
 
 	public DiscordLinkBot(String token, String[] channels, String prefix) {
@@ -112,9 +113,13 @@ public class DiscordLinkBot {
 
 	private void onMessage(MessageCreateEvent event) {
 		Message msg = event.getMessage();
-		if (!event.getMember().isPresent() || event.getMember().get().isBot() || !isListening(msg.getChannelId()) || DiscordLink.instance.server.isRunning()) return;
-		int executeReturn = dispatcher.execute(msg.getContent().get(), msg);
+		if (!event.getMember().isPresent() || event.getMember().get().isBot() || !isListening(msg.getChannelId()) || listening) return;
+		int executeReturn = -1;
 
+		try {
+			executeReturn = dispatcher.execute(msg.getContent().get(), msg);
+		} catch (Exception e) {}
+		LogManager.getLogger("discord-link").info(String.format("%s %s", executeReturn, msg.getContent().get()));
 		if(executeReturn == -2) {
 			DiscordLink.instance.server.getPlayerManager().sendToAll(new GameMessageS2CPacket(new LiteralText(msg.getContent().orElse("§oEmpty Message")),
 					MessageType.CHAT,

@@ -5,7 +5,6 @@ import com.mojang.brigadier.StringReader;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import io.maddymakesgames.discordlink.DiscordBot.Util.CommandHelper;
-import io.maddymakesgames.discordlink.DiscordLink;
 import io.maddymakesgames.discordlink.Util.LinkableUser;
 import net.minecraft.server.command.ServerCommandSource;
 
