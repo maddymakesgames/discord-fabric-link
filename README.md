@@ -1,9 +1,5 @@
-# Fabric Example Mod
+# Fabric-Discord link
 
-## Setup
+A fabric mod that connects minecraft and discord chat and allows the creation of commands via [brigadier](https://github.com/Mojang/brigadier)
 
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
-
-## License
-
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+currently unfinished as I want to rework the linking of discord users and minecraft accounts and add more commands
