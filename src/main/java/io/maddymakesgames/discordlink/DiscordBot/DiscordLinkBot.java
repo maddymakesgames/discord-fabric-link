@@ -110,7 +110,7 @@ public class DiscordLinkBot {
 	private void onMessage(MessageCreateEvent event) {
 		Message msg = event.getMessage();
 		if (!event.getMember().isPresent() || event.getMember().get().isBot() || !isListening(msg.getChannelId()) || listening) return;
-		int executeReturn = -1;
+		int executeReturn = -2;
 
 		try {
 			executeReturn = dispatcher.execute(msg.getContent().get(), msg);
