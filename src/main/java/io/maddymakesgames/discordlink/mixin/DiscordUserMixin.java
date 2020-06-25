@@ -4,19 +4,30 @@
 
 package io.maddymakesgames.discordlink.mixin;
 
+import discord4j.core.ServiceMediator;
+import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
+import io.maddymakesgames.discordlink.DiscordLink;
 import io.maddymakesgames.discordlink.Util.LinkableUser;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.UUID;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = User.class, remap = false)
-public class DiscordUserMixin implements LinkableUser {
+public abstract class DiscordUserMixin implements LinkableUser {
+
+	@Shadow public abstract Snowflake getId();
+
+	@Inject(method="<init>", at = @At("RETURN"))
+	public void constructor(ServiceMediator serviceMediator, UserBean data, CallbackInfo ci) {
+		DiscordLink.instance.bot.getLink(getId());
+		System.out.println("Creating a new user");
+	}
 	
 	@Unique
 	private ServerPlayerEntity linkedPlayer;
@@ -31,11 +42,14 @@ public class DiscordUserMixin implements LinkableUser {
 	@Override
 	public void link(ServerPlayerEntity linkedID) {
 		this.linkedPlayer = linkedID;
+		System.out.println("Registering link with " + linkedID.getDisplayName().asString());
+		DiscordLink.instance.bot.registerLink(getId(), linkedPlayer);
 	}
 
 	@Unique
 	@Override
 	public ServerPlayerEntity getLink() {
+		if(linkedPlayer == null) link(DiscordLink.instance.bot.getLink(getId()));
 		return linkedPlayer;
 	}
 }

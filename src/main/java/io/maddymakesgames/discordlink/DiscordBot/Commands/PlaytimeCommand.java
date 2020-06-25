@@ -45,7 +45,7 @@ public class PlaytimeCommand implements DiscordCommand {
 
 	@Override
 	public CommandReturn execute(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-		ServerPlayerEntity player = ((DiscordCommandSource)ctx.getSource()).isDiscord() ? ((LinkableUser)((DiscordCommandSource)ctx.getSource()).getUser()).getLink() : ctx.getSource().getPlayer();
+		ServerPlayerEntity player = ((DiscordCommandSource)ctx.getSource()).isDiscord() ? ((LinkableUser)(((DiscordCommandSource)ctx.getSource()).getUser())).getLink() : ctx.getSource().getPlayer();
 
 		if(player == null)
 			return failure("You must be linked to a minecraft account to use this command");

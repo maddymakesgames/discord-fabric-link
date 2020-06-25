@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 public class DiscordLinkBot {
 	private final DiscordClient client;
 	private final List<TextChannel> activeChannels = new ArrayList<>();
-	private final HashMap<String, DiscordCommand> commands = new HashMap<>();
 	private final DiscordCommandDispatcher dispatcher;
+	private final HashMap<Snowflake, ServerPlayerEntity> links = new HashMap<>();
 
 	public final HashMap<String, ServerPlayerEntity> registeringPlayersCache = new HashMap<>();
 	public final String prefix;
@@ -61,10 +61,6 @@ public class DiscordLinkBot {
 
 	public void register(DiscordCommand cmd) {
 		cmd.register(dispatcher);
-	}
-
-	public DiscordCommand getCommand(String str) {
-		return commands.get(str.split(" ")[0]);
 	}
 
 	public void sendMessage(String message) {
@@ -121,10 +117,20 @@ public class DiscordLinkBot {
 		} catch (Exception e) {}
 		LogManager.getLogger("discord-link").info(String.format("%s %s", executeReturn, msg.getContent().get()));
 		if(executeReturn == -2) {
-			DiscordLink.instance.server.getPlayerManager().sendToAll(new GameMessageS2CPacket(new LiteralText(msg.getContent().orElse("§oEmpty Message")),
+			DiscordLink.instance.server.getPlayerManager().sendToAll(new GameMessageS2CPacket(new LiteralText(
+					String.format("[%s]:%s",
+							msg.getAuthorAsMember().block().getDisplayName(),
+							msg.getContent().orElse("§oEmpty Message"))),
 					MessageType.CHAT,
 					((LinkableUser)msg.getAuthor().get()).isLinked() ? ((LinkableUser)msg.getAuthor().get()).getLink().getUuid() : UUID.randomUUID()));
 		}
+	}
 
+	public void registerLink(Snowflake user, ServerPlayerEntity player) {
+		links.put(user, player);
+	}
+
+	public ServerPlayerEntity getLink(Snowflake user) {
+		return links.get(user);
 	}
 }
